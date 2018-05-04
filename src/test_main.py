@@ -1,8 +1,12 @@
 import unittest
+import pprint
 
-from logics.base import *
+pp = pprint.PrettyPrinter()
+def pprint(obj): pp.pprint(obj)
+
 from logics.board import *
 from logics.hero import *
+from engine.engine import *
 
 class TestC1(unittest.TestCase):
 
@@ -12,5 +16,25 @@ class TestC1(unittest.TestCase):
 
     def test_create(self):
         h = Hero(0) 
-        b = Base(h)
-        print ("Base created!")
+        print ("Hero created!")
+
+    def test_init_game(self):
+        heroes = init_game(3)
+        
+        print("heroes:")
+        pprint( list( map( lambda x : vars(x), heroes) ) )
+
+    def test_import(self):
+        mod = load_dynamic("/home/d0naim/dev/virtual-box/assets/base.py")
+        print (mod)
+
+        h = Hero(0) 
+        b = mod.Base(h)
+        b.on_die()
+
+    def test_load_card(self):
+        hero = Hero(0)
+        load_card_for_hero(hero, "/home/d0naim/dev/virtual-box/assets/minion_card.py")
+        
+    
+

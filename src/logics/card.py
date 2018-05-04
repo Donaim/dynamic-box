@@ -1,5 +1,5 @@
 
-from hero import Hero
+from logics.hero import Hero
 
 class Card:
 
