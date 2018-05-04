@@ -6,7 +6,11 @@ class Card:
     def __init__(self):
         pass
 
-    def play(self, owner: Hero):
+    def play(self, owner: Hero) -> bool:
+        '''
+        Return False on fail
+        '''
+        
         pass
 
     

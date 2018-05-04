@@ -17,4 +17,6 @@ def load_card_for_hero(hero, path_to_card_module: str):
     mod = load_dynamic(path_to_card_module)
     card_class = get_last_class_from_module(mod)
     card = card_class()
-
+    hero.hand.add_card(card)
+    
+    return card

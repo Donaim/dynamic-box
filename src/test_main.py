@@ -36,5 +36,9 @@ class TestC1(unittest.TestCase):
         hero = Hero(0)
         load_card_for_hero(hero, "/home/d0naim/dev/virtual-box/assets/minion_card.py")
         
-    
+    def test_play_card(self):
+        hero = Hero(0)
+        card = load_card_for_hero(hero, "/home/d0naim/dev/virtual-box/assets/minion_card.py")
+        card.play(hero)
+        
 
