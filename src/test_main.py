@@ -22,10 +22,10 @@ class TestC1(unittest.TestCase):
         heroes = init_game(3)
         
         print("heroes:")
-        pprint( list( map( lambda x : vars(x), heroes) ) )
+        pprint( list( map( vars, heroes) ) )
 
     def test_import(self):
-        mod = load_dynamic("/home/d0naim/dev/virtual-box/assets/base.py")
+        mod = load_dynamic("/home/d0naim/dev/dynamic-box/assets/base.py")
         print (mod)
 
         h = Hero(0) 
@@ -34,11 +34,13 @@ class TestC1(unittest.TestCase):
 
     def test_load_card(self):
         hero = Hero(0)
-        load_card_for_hero(hero, "/home/d0naim/dev/virtual-box/assets/minion_card.py")
-        
+        load_card_for_hero(hero, "/home/d0naim/dev/dynamic-box/assets/minion_card.py")
+        load_dynamic_to_sys("/home/d0naim/dev/dynamic-box/assets/minion.py")
+        load_card_for_hero(hero, "/home/d0naim/dev/dynamic-box/assets/warior.py")
+
     def test_play_card(self):
         hero = Hero(0)
-        card = load_card_for_hero(hero, "/home/d0naim/dev/virtual-box/assets/minion_card.py")
+        card = load_card_for_hero(hero, "/home/d0naim/dev/dynamic-box/assets/minion_card.py")
         card.play(hero)
-        
 
+    

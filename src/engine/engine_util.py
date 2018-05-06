@@ -17,6 +17,12 @@ def load_dynamic(path: str):
 
     return re
 
+def load_dynamic_to_sys(path: str):
+    mod = load_dynamic(path)
+    sys.modules[mod.__name__] = mod
+    
+    return mod
+
 def get_last_class_from_module(mod):
     mems = inspect.getmembers(mod)
     for name, obj in reversed(mems):
