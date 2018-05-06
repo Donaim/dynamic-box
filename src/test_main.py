@@ -40,7 +40,12 @@ class TestC1(unittest.TestCase):
 
     def test_play_card(self):
         hero = Hero(0)
-        card = load_card_for_hero(hero, "/home/d0naim/dev/dynamic-box/assets/minion_card.py")
+
+        load_card_for_hero(hero, "/home/d0naim/dev/dynamic-box/assets/minion_card.py")
+        load_dynamic_to_sys("/home/d0naim/dev/dynamic-box/assets/minion.py")
+        load_dynamic_to_sys("/home/d0naim/dev/dynamic-box/assets/warior.py")
+        card = load_card_for_hero(hero, "/home/d0naim/dev/dynamic-box/assets/warior_card.py")
+
         card.play(hero)
 
     

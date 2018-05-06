@@ -8,3 +8,4 @@ class Warior(Minion):
         self.hp = 100
         self.attack = 20
 
+        print ("WARRIOR CREATED!")
