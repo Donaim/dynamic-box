@@ -19,8 +19,7 @@ class TestC1(unittest.TestCase):
 		s2 = Speaker(ip='localhost', port=1338)
 
 		s2.send(b"Hello :)", 'localhost', 1338)
-		s2.closefriend('localhost', 1338)
 
 		time.sleep(1)
 
-		s.close()
+		s.stop()

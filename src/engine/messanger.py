@@ -6,9 +6,6 @@ import logging
 import threading
 from threading import Thread
 
-# TCP_IP = '127.0.0.1'
-TCP_IP = 'localhost'
-TCP_PORT = 5005
 BUFFER_SIZE = 1024
 
 class Speaker:
@@ -63,7 +60,7 @@ class Speaker:
 			sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 			sock.settimeout(self.timeout)
 
-			server_address = (TCP_IP, TCP_PORT)
+			server_address = (self.ip, self.port)
 			print('starting up on {} port {}'.format(*server_address))
 			sock.bind(server_address)
 
@@ -81,22 +78,30 @@ class Speaker:
 			s = self.targets[key]
 		except KeyError:
 			s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-			s.connect((TCP_IP, TCP_PORT))
+			s.connect((ip, port))
 			self.targets[key] = s
 
 		return s.send(mess)
 
-	def closefriend(self, ip: int, port: int):
+	def closetarget(self, ip: int, port: int):
 		key = (ip, port)
 		s = self.targets[key]
 		if not s:
-			raise Exception("No such friend ({}, {})".format(ip, port))
+			raise Exception("No such target ({}, {})".format(ip, port))
 
 		s.close()
 		self.targets[key] = None
 
-	def close(self):
+	def stop(self):
 		if self.__listening:
 			self.sock.close()
+			self.__listening = False
 		else:
 			raise Exception("Not started")
+
+	def __del__(self):
+		for target in self.targets.values():
+			target.close()
+
+		if self.__listening:
+			self.stop()
