@@ -6,14 +6,17 @@ import logging
 import threading
 from threading import Thread
 
-BUFFER_SIZE = 1024
+BUFFER_SIZE = 4096
 
 class Speaker:
+	counter = 0
+
 	def __init__(self, ip: int, port: int):
+		Speaker.counter += 1
 		self.ip = ip
 		self.port = port
 		self.timeout = 0.1
-		self.name = "Unnamed"
+		self.name = "Speaker" + str(Speaker.counter)
 		self.sock = None
 		self.__listening = False
 		self.callback = None
@@ -21,10 +24,10 @@ class Speaker:
 
 	def _listen_conn(self, connection, client_address):
 		data = None
-		print('connection from', client_address)
+		print('{} listening to {}'.format(self.name, client_address))
 		while True:
 			try:
-				data = connection.recv(16)
+				data = connection.recv(BUFFER_SIZE)
 				if not data:
 					break
 			except socket.timeout:
@@ -35,7 +38,7 @@ class Speaker:
 			self.callback(data)
 
 		connection.close()
-		print ("Closed connection {}".format(client_address))
+		print ("{} closed connection with {}".format(self.name, client_address))
 
 	def _accept_loop(self):
 		self.__listening = True
