@@ -14,8 +14,10 @@ class TestC1(unittest.TestCase):
 		def callback(data: str):
 			print ("Test got '{}'".format(data))
 
-		connect_listen(callback)
+		s = connect_listen(callback)
 		send_message(b"Hello :)")
 
 		time.sleep(1)
+
+		s.close()
 
