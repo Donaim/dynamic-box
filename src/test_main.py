@@ -8,11 +8,17 @@ from logics.board import *
 from logics.hero import *
 from engine.engine import *
 
+import os
+
+wd = os.getcwd()
+root = os.path.normpath(os.path.join(wd, '..'))
+
 class TestC1(unittest.TestCase):
 
     def test_random(self):
         import random
         print(random.randint(1, 10))
+        print ("root dir = " + root)
 
     def test_create(self):
         h = Hero(0) 
@@ -25,7 +31,7 @@ class TestC1(unittest.TestCase):
         pprint( list( map( vars, heroes) ) )
 
     def test_import(self):
-        mod = load_dynamic("/home/d0naim/dev/dynamic-box/assets/base.py")
+        mod = load_dynamic(root + "/assets/base.py")
         print (mod)
 
         h = Hero(0) 
@@ -34,17 +40,17 @@ class TestC1(unittest.TestCase):
 
     def test_load_card(self):
         hero = Hero(0)
-        load_card_for_hero(hero, "/home/d0naim/dev/dynamic-box/assets/minion_card.py")
-        load_dynamic_to_sys("/home/d0naim/dev/dynamic-box/assets/minion.py")
-        load_card_for_hero(hero, "/home/d0naim/dev/dynamic-box/assets/warior.py")
+        load_card_for_hero(hero, root + "/assets/minion_card.py")
+        load_dynamic_to_sys(root + "/assets/minion.py")
+        load_card_for_hero(hero, root + "/assets/warior.py")
 
     def test_play_card(self):
         hero = Hero(0)
 
-        load_card_for_hero(hero, "/home/d0naim/dev/dynamic-box/assets/minion_card.py")
-        load_dynamic_to_sys("/home/d0naim/dev/dynamic-box/assets/minion.py")
-        load_dynamic_to_sys("/home/d0naim/dev/dynamic-box/assets/warior.py")
-        card = load_card_for_hero(hero, "/home/d0naim/dev/dynamic-box/assets/warior_card.py")
+        load_card_for_hero(hero, root + "/assets/minion_card.py")
+        load_dynamic_to_sys(root + "/assets/minion.py")
+        load_dynamic_to_sys(root + "/assets/warior.py")
+        card = load_card_for_hero(hero, root + "/assets/warior_card.py")
 
         card.play(hero)
 
