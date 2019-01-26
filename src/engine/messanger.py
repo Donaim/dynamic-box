@@ -55,7 +55,7 @@ class Speaker:
 			raise Exception("Started already")
 
 		self.callback = callback
-		
+
 		if not self.sock:
 			sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 			sock.settimeout(self.timeout)
