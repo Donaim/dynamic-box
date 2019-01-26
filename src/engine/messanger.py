@@ -11,60 +11,92 @@ TCP_IP = 'localhost'
 TCP_PORT = 5005
 BUFFER_SIZE = 1024
 
-def _listen_conn(connection, client_address, func):
-	data = None
-	print('connection from', client_address)
-	while True:
-		try:
-			data = connection.recv(16)
-			if not data:
+class Speaker:
+	def __init__(self, ip: int, port: int):
+		self.ip = ip
+		self.port = port
+		self.timeout = 0.1
+		self.name = "Unnamed"
+		self.sock = None
+		self.__listening = False
+		self.callback = None
+		self.targets = {}
+
+	def _listen_conn(self, connection, client_address):
+		data = None
+		print('connection from', client_address)
+		while True:
+			try:
+				data = connection.recv(16)
+				if not data:
+					break
+			except socket.timeout:
+				continue
+			except Exception as ex:
 				break
-		except socket.timeout:
-			continue
-		except Exception as ex:
-			break
 
-		func(data)
+			self.callback(data)
 
-	connection.close()
-	print ("Closed connection {}".format(client_address))
+		connection.close()
+		print ("Closed connection {}".format(client_address))
 
-def _accept_loop(sock, func):
-	print ("Started listening")
-	while True:
+	def _accept_loop(self):
+		self.__listening = True
+		print ("{} started listening".format(self.name))
+		while True:
+			try:
+				conn, addr = self.sock.accept()
+				th = Thread(target=self._listen_conn, args=(conn, addr, ))
+				th.start()
+			except socket.timeout:
+				continue
+			except Exception as ex:
+				break
+
+	def listen(self, callback):
+		if self.__listening:
+			raise Exception("Started already")
+
+		self.callback = callback
+		
+		if not self.sock:
+			sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+			sock.settimeout(self.timeout)
+
+			server_address = (TCP_IP, TCP_PORT)
+			print('starting up on {} port {}'.format(*server_address))
+			sock.bind(server_address)
+
+			sock.listen(1)
+
+			self.sock = sock
+
+		self.listh = Thread(target=self._accept_loop)
+		self.listh.start()
+
+	def send(self, mess: bytes, ip: int, port: int):
+		key = (ip, port)
+
 		try:
-			conn, addr = sock.accept()
-			th = Thread(target=_listen_conn, args=(conn, addr, func, ))
-			th.start()
-		except socket.timeout:
-			continue
-		except Exception as ex:
-			break
+			s = self.targets[key]
+		except KeyError:
+			s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+			s.connect((TCP_IP, TCP_PORT))
+			self.targets[key] = s
 
-# Returns cancellation token
-def connect_listen(func):
-	# Create a TCP/IP socket
-	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-	# This is important or will block otherwise
-	sock.settimeout(0.1)
+		return s.send(mess)
 
-	# Bind the socket to the port
-	server_address = (TCP_IP, TCP_PORT)
-	print('starting up on {} port {}'.format(*server_address))
-	sock.bind(server_address)
+	def closefriend(self, ip: int, port: int):
+		key = (ip, port)
+		s = self.targets[key]
+		if not s:
+			raise Exception("No such friend ({}, {})".format(ip, port))
 
-	# Listen for incoming connections
-	sock.listen(1)
+		s.close()
+		self.targets[key] = None
 
-	# Delegate listening to separate thread
-	thst = Thread(target=_accept_loop, args=(sock, func, ))
-	thst.start()
-
-	return sock
-
-def send_message(mess: str):
-	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-	s.connect((TCP_IP, TCP_PORT))
-	s.send(mess)
-	s.close()
-	print ("Sending done")
+	def close(self):
+		if self.__listening:
+			self.sock.close()
+		else:
+			raise Exception("Not started")

@@ -14,10 +14,13 @@ class TestC1(unittest.TestCase):
 		def callback(data: str):
 			print ("Test got '{}'".format(data))
 
-		s = connect_listen(callback)
-		send_message(b"Hello :)")
+		s = Speaker(ip='localhost', port=1338)
+		s.listen(callback)
+		s2 = Speaker(ip='localhost', port=1338)
+
+		s2.send(b"Hello :)", 'localhost', 1338)
+		s2.closefriend('localhost', 1338)
 
 		time.sleep(1)
 
 		s.close()
-
