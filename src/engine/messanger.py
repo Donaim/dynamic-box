@@ -35,7 +35,7 @@ class Speaker:
 			except Exception as ex:
 				break
 
-			self.callback(data)
+			self.callback(client_address=client_address, data=data)
 
 		connection.close()
 		print ("{} closed connection with {}".format(self.name, client_address))

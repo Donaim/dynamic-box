@@ -11,7 +11,7 @@ class TestC1(unittest.TestCase):
 		print(random.randint(1, 10))
 
 	def test_send_recieve(self):
-		def callback(data: str):
+		def callback(client_address: str, data: str):
 			print ("Test got '{}'".format(data))
 
 		s = Speaker(ip='localhost', port=1338)
