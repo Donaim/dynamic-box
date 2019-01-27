@@ -53,11 +53,14 @@ class PlayerSpeaker:
 		self._send_json({'from': self.id, 'type': 'click_board', 'leftclick': leftclick, 'x': x, 'y': y},
 						callback=callback)
 
-	def press_key(self, key: str):
-		pass
+	def press_key(self, callback, key: str):
+		self._send_json({'from': self.id, 'type': 'press_key', 'key': key},
+						callback=callback)
 
 	def make_card_proposal(self, code: str):
-		pass
+		self._send_json({'from': self.id, 'type': 'make_card_proposal', 'code': code},
+						callback=callback)
 
-	def respond_to_card_proposal(self, proposal_id: int, answer: str):
-		pass
+	def respond_to_card_proposal(self, callback, proposal_id: int, answer: str):
+		self._send_json({'from': self.id, 'type': 'respond_to_card_proposal', 'proposal_id': proposal_id, 'answer': answer},
+						callback=callback)
