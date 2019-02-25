@@ -10,9 +10,7 @@ def server_method(method):
 	print('params = {}'.format(params))
 
 	def clojured(*args, **kwargs):
-		player_id = kwargs['player_id'] if 'player_id' in kwargs else args[0]
-
-		dd = {'player_id': player_id}
+		dd = {}
 
 		for (i, a) in enumerate(args):
 			dd[params[i]] = a
