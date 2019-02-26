@@ -1,66 +1,47 @@
 
-from logics.board import *
-from logics.hero import *
-from logics.hand import *
-from logics.card import *
+# from logics.board import *
+# from logics.hero import *
+# from logics.hand import *
+# from logics.card import *
 
-import messanger
-import random
-import binencoder
-import json
+from actions import *
 
-ENCODING='ascii'
-
-class PlayerSpeaker:
+class PlayerSpeaker(GameSpeaker):
 	def __init__(self, id: int, server_ip: str, server_port: int):
+		super(PlayerSpeaker, self).__init__(server_ip=server_ip, server_port=server_port)
 		self.id = id
-		self.speaker = None
-		self.server_ip = server_ip
-		self.server_port = server_port
-		self._requests = {}
 
-	def _send_json(self, obj: dict, callback):
-		request_id = random.randint(0, 9999)
-		obj['request_id'] = request_id
-		self._requests[request_id] = (obj, callback)
+	@server_method
+	def click_board(self, player_id: int, leftclick: bool, x: int, y: int):
+		''' hello here '''
 
-		encoded = json.dumps(obj, check_circular=False)
-		bi = bytes(encoded, encoding=ENCODING)
-		self.speaker.send(bi, self.server_ip, self.server_port)
+		print('I klicked board!!')
+		return 42
 
-	def _recieve_responce(self, client_address, data: bytes):
-		s = data.decode(encoding=ENCODING)
-		decoded = json.loads(s, encoding=ENCODING)
+	@server_method
+	def press_key(self, player_id: int, key: str):
+		''' hi there '''
+		pass
 
-		request_id = decoded['request_id']
-		(obj, callback) = self._requests[request_id]
+	@server_method
+	def make_card_proposal(self, player_id: int, code: str):
+		return 2
 
-		# There is no synchronization from our side required
-		# since we are using TCP that does that part
-		callback(request=obj, responce=decoded)
+	@server_method
+	def respond_to_card_proposal(self, player_id: int, proposal_id: int, answer: str):
+		pass
 
-	def init_speaker(self, callback):
-		if not self.speaker is None:
-			raise Exception("Speaker is already initialized")
+import server
 
-		self.speaker = messanger.Speaker('localhost', 5009)
+serv = server.Server('127.0.0.1', 7731)
+serv.init_speaker()
 
-		self.speaker.listen(self._recieve_responce)
+sp = PlayerSpeaker(0, '127.0.0.1', 7731)
+sp.init_speaker(None)
+x = sp.click_board(2, True, 1, y=2)
 
-		self._send_json({'from': self.id, 'type': 'init'}, callback=callback)
+print('x = {}'.format(x))
 
-	def click_board(self, callback, leftclick: bool, x: int, y: int):
-		self._send_json({'from': self.id, 'type': 'click_board', 'leftclick': leftclick, 'x': x, 'y': y},
-		                callback=callback)
+import time
+time.sleep(100)
 
-	def press_key(self, callback, key: str):
-		self._send_json({'from': self.id, 'type': 'press_key', 'key': key},
-		                callback=callback)
-
-	def make_card_proposal(self, code: str):
-		self._send_json({'from': self.id, 'type': 'make_card_proposal', 'code': code},
-		                callback=callback)
-
-	def respond_to_card_proposal(self, callback, proposal_id: int, answer: str):
-		self._send_json({'from': self.id, 'type': 'respond_to_card_proposal', 'proposal_id': proposal_id, 'answer': answer},
-		                callback=callback)

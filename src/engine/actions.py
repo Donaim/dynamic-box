@@ -1,15 +1,62 @@
 
 import inspect
 import json
+import random
+
+import messanger
+
+ENCODING='ascii'
+
+class GameSpeaker:
+	def __init__(self, server_ip: str, server_port: int):
+		self.speaker = None
+		self.server_ip = server_ip
+		self.server_port = server_port
+		self._requests = {}
+
+	def _send_json(self, obj: dict, callback):
+		if not self.speaker:
+			raise Exception('Speaker is not initialized')
+
+		request_id = random.randint(0, 9999)
+		obj['request_id'] = request_id
+		self._requests[request_id] = (obj, callback)
+
+		encoded = json.dumps(obj, check_circular=False)
+		bi = bytes(encoded, encoding=ENCODING)
+		self.speaker.send(bi, self.server_ip, self.server_port)
+
+	def _recieve_responce(self, client_address, data: bytes):
+		s = data.decode(encoding=ENCODING)
+		decoded = json.loads(s, encoding=ENCODING)
+
+		request_id = decoded['request_id']
+		(obj, callback) = self._requests[request_id]
+
+		if callback:
+			# There is no synchronization from our side required
+			# since we are using TCP that does that part
+			callback(request=obj, responce=decoded)
+
+	def init_speaker(self, callback):
+		if not self.speaker is None:
+			raise Exception("Speaker is already initialized")
+
+		self.speaker = messanger.Speaker('localhost', 2007)
+
+		self.speaker.listen(self._recieve_responce)
+
+		self._send_json({'type': 'init'}, callback=callback)
 
 def server_method(method):
+	''' Encodes function call as json and sends it to server,
+	then executes call '''
+
 	sign = inspect.signature(method)
 	params = list(sign.parameters.keys())
 	params = params[1:] # Skip `self'
 
-	print('params = {}'.format(params))
-
-	def clojured(self, *args, **kwargs):
+	def clojured(self: GameSpeaker, *args, **kwargs):
 		dd = {}
 
 		for (i, a) in enumerate(args):
@@ -18,47 +65,8 @@ def server_method(method):
 		for key in kwargs:
 			dd[key] = kwargs[key]
 
-		js = json.dumps(dd, check_circular=False)
+		self._send_json(obj=dd, callback=None)
 
-		print('passing args=<{}>; kwargs=<{}>; '.format(args, kwargs))
-		print('id = {}'.format(self.id))
-		print('dd = {};'.format(js))
 		return method(self, *args, **kwargs)
 
 	return clojured
-
-class GameSpeaker:
-
-	def __init__(self):
-		self.id = 202
-
-	@server_method
-	def click_board(self, player_id: int, leftclick: bool, x: int, y: int):
-		''' hello here '''
-
-		print('I klicked board!!')
-		return 42
-
-	@server_method
-	def press_key(self, player_id: int, key: str):
-		''' hi there '''
-		pass
-
-	@server_method
-	def make_card_proposal(self, player_id: int, code: str):
-		return 2
-
-	@server_method
-	def respond_to_card_proposal(self, player_id: int, proposal_id: int, answer: str):
-		pass
-
-
-def method_to_json(method) -> str:
-	raise NotImplementedError()
-
-
-sp = GameSpeaker()
-x = sp.click_board(2, True, 1, y=2)
-
-print('x = {}'.format(x))
-
