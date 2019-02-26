@@ -93,9 +93,15 @@ class Speaker:
 			raise Exception("No such target ({}, {})".format(ip, port))
 
 		s.close()
-		self.targets[key] = None
+		del self.targets[key]
 
 	def stop(self):
+		while self.targets:
+			k = next(iter(self.targets))
+			v = self.targets[k]
+			v.close()
+			del self.targets[k]
+
 		if self.__listening:
 			self.sock.close()
 			self.__listening = False
