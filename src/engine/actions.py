@@ -1,15 +1,15 @@
 
-import abc
 import inspect
-from collections import OrderedDict
+import json
 
 def server_method(method):
 	sign = inspect.signature(method)
-	params = list(OrderedDict(sign.parameters).keys())
+	params = list(sign.parameters.keys())
+	params = params[1:] # Skip `self'
 
 	print('params = {}'.format(params))
 
-	def clojured(*args, **kwargs):
+	def clojured(self, *args, **kwargs):
 		dd = {}
 
 		for (i, a) in enumerate(args):
@@ -18,15 +18,14 @@ def server_method(method):
 		for key in kwargs:
 			dd[key] = kwargs[key]
 
-		print('passing args=<{}>; kwargs=<{}>; '.format(args, kwargs))
-		print('dd = {};'.format(dd))
-		return method(*args, **kwargs)
+		js = json.dumps(dd, check_circular=False)
 
-	# print('ret = {}\n'.format(method(None))
-	print('doc:\n{}\n'.format(inspect.getdoc(method)))
+		print('passing args=<{}>; kwargs=<{}>; '.format(args, kwargs))
+		print('id = {}'.format(self.id))
+		print('dd = {};'.format(js))
+		return method(self, *args, **kwargs)
 
 	return clojured
-	# return method
 
 class GameSpeaker:
 
