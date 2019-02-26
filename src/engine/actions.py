@@ -9,14 +9,23 @@ ENCODING='ascii'
 
 class GameSpeaker:
 	def __init__(self, server_ip: str, server_port: int):
-		self.speaker = None
-		self.server_ip = server_ip
-		self.server_port = server_port
+		self._speaker = None
+		self._server_ip = server_ip
+		self._server_port = server_port
 		self._requests = {}
 
+	def _get_child_state(self) -> dict:
+		re = {}
+		for m in filter(lambda m: not m.startswith('_'), vars(self)):
+			re[m] = self.__getattribute__(m)
+		return re
+
 	def _send_json(self, obj: dict, callback):
-		if not self.speaker:
+		if not self._speaker:
 			raise Exception('Speaker is not initialized')
+
+		state = self._get_child_state()
+		obj = { **state, **obj }
 
 		request_id = random.randint(0, 9999)
 		obj['request_id'] = request_id
@@ -24,7 +33,7 @@ class GameSpeaker:
 
 		encoded = json.dumps(obj, check_circular=False)
 		bi = bytes(encoded, encoding=ENCODING)
-		self.speaker.send(bi, self.server_ip, self.server_port)
+		self._speaker.send(bi, self._server_ip, self._server_port)
 
 	def _recieve_responce(self, client_address, data: bytes):
 		s = data.decode(encoding=ENCODING)
@@ -39,14 +48,22 @@ class GameSpeaker:
 			callback(request=obj, responce=decoded)
 
 	def init_speaker(self, callback):
-		if not self.speaker is None:
+		if not self._speaker is None:
 			raise Exception("Speaker is already initialized")
 
-		self.speaker = messanger.Speaker('localhost', 2007)
+		self._speaker = messanger.Speaker('localhost', 2007)
 
-		self.speaker.listen(self._recieve_responce)
+		self._speaker.listen(self._recieve_responce)
 
 		self._send_json({'type': 'init'}, callback=callback)
+
+	def stop(self):
+		if self._speaker is None:
+			raise Exception("Speaker is not initialized")
+
+		self._send_json({'type': 'stop'}, callback=None)
+
+		return self._speaker.stop()
 
 def server_method(method):
 	''' Encodes function call as json and sends it to server,
@@ -58,6 +75,8 @@ def server_method(method):
 
 	def clojured(self: GameSpeaker, *args, **kwargs):
 		dd = {}
+
+		dd['type'] = method.__name__
 
 		for (i, a) in enumerate(args):
 			dd[params[i]] = a

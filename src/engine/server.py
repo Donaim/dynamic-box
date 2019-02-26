@@ -21,3 +21,6 @@ class Server:
 		self.speaker = messanger.Speaker(self.ip, self.port)
 
 		self.speaker.listen(self._recieve_responce)
+
+	def stop(self):
+		return self.speaker.stop()
