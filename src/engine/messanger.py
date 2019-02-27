@@ -84,6 +84,9 @@ class Speaker:
 			s.connect((ip, port))
 			self.targets[key] = s
 
+		if mess[-1] != 0:
+			mess += b'\0'
+
 		return s.send(mess)
 
 	def closetarget(self, ip: int, port: int):
