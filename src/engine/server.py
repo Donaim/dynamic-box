@@ -1,7 +1,7 @@
 
 import messanger
 
-from enlog import *
+import enlog
 
 ENCODING = 'ascii'
 
@@ -16,11 +16,7 @@ class Server:
 	def _recieve_responce(self, client_address, package: bytes):
 		s = package.decode(encoding=ENCODING)
 
-		for b in package:
-			if b == 0:
-				print('zero!')
-
-		trace('server {} got from {} client s:\n{}'.format(self.ip, 'old' if client_address in self.clients else 'new', s))
+		enlog.trace('server {} got from {} client s:\n{}'.format(self.ip, 'old' if client_address in self.clients else 'new', s))
 
 	def init_speaker(self):
 		if not self.speaker is None:

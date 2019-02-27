@@ -1,7 +1,7 @@
 
 import asyncore
 import socket
-import logging
+import enlog
 
 import threading
 from threading import Thread
@@ -24,7 +24,7 @@ class Speaker:
 
 	def _listen_conn(self, connection, client_address):
 		data = None
-		print('{} listening to {}'.format(self.name, client_address))
+		enlog.trace('{} listening to {}'.format(self.name, client_address))
 		while True:
 			try:
 				data = connection.recv(BUFFER_SIZE)
@@ -40,11 +40,11 @@ class Speaker:
 					self.callback(client_address=client_address, package=package)
 
 		connection.close()
-		print ("{} closed connection with {}".format(self.name, client_address))
+		enlog.trace("{} closed connection with {}".format(self.name, client_address))
 
 	def _accept_loop(self):
 		self.__listening = True
-		print ("{} started listening".format(self.name))
+		enlog.trace ("{} started listening".format(self.name))
 		while True:
 			try:
 				conn, addr = self.sock.accept()
@@ -66,7 +66,7 @@ class Speaker:
 			sock.settimeout(self.timeout)
 
 			server_address = (self.ip, self.port)
-			print('starting up on {} port {}'.format(*server_address))
+			enlog.trace('starting up on {} port {}'.format(*server_address))
 			sock.bind(server_address)
 
 			sock.listen(1)
