@@ -35,7 +35,9 @@ class Speaker:
 			except Exception as ex:
 				break
 
-			self.callback(client_address=client_address, data=data)
+			for package in data.split(b'\0'):
+				if package:
+					self.callback(client_address=client_address, package=package)
 
 		connection.close()
 		print ("{} closed connection with {}".format(self.name, client_address))

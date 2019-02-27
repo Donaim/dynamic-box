@@ -35,8 +35,8 @@ class GameSpeaker:
 		bi = bytes(encoded, encoding=ENCODING)
 		self._speaker.send(bi, self._server_ip, self._server_port)
 
-	def _recieve_responce(self, client_address, data: bytes):
-		s = data.decode(encoding=ENCODING)
+	def _recieve_responce(self, client_address, package: bytes):
+		s = package.decode(encoding=ENCODING)
 		decoded = json.loads(s, encoding=ENCODING)
 
 		request_id = decoded['request_id']
